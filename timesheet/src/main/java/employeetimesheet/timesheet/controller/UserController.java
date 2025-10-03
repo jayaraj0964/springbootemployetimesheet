@@ -3,6 +3,7 @@ package employeetimesheet.timesheet.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
@@ -28,11 +29,16 @@ public class UserController {
 
 
     // 🔍 Get all users (admin only ideally)
-    @GetMapping
+  @GetMapping("/all")
+    // @PreAuthorize("hasRole('ADMIN')") // Restrict to admins
     public List<User> getAll() {
-        return userService.findAll();
+        List<User> users = userService.findAll();
+        logger.info("🔍 Returning {} users from /api/users/all", users.size()); // Log the number of users
+        if (users.isEmpty()) {
+            logger.warn("⚠️ No users found in the database");
+        }
+        return users;
     }
-
     // 🔍 Get user by ID
   @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {

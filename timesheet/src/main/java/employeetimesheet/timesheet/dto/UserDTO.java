@@ -21,4 +21,6 @@ public class UserDTO {
     private String relationship; // Father | Mother | Sister | Brother | Spouse
     private String educationQualification; // "B.Tech" | "Degree"
     private String email;
+    private Long   teamid;
+    
 }

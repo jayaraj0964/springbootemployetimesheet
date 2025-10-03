@@ -1,10 +1,15 @@
 package employeetimesheet.timesheet.dto; 
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TimeSheetDTO {
     private Integer timesheetId;
     private Integer categoryId;
@@ -14,3 +19,4 @@ public class TimeSheetDTO {
     private LocalTime hoursWorked;
     private String details;
 }
+ 

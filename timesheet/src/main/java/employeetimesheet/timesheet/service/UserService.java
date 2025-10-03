@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 import employeetimesheet.timesheet.dto.UserDTO;
 import employeetimesheet.timesheet.entity.AppUser;
 import employeetimesheet.timesheet.entity.Role;
+import employeetimesheet.timesheet.entity.Teams;
 import employeetimesheet.timesheet.entity.User;
 import employeetimesheet.timesheet.repository.RoleRepository;
+import employeetimesheet.timesheet.repository.TeamRepository;
 import employeetimesheet.timesheet.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final TeamRepository teamRepository;
 
     public List<User> findAll() { return userRepository.findAll(); }
 
@@ -39,27 +42,37 @@ public class UserService {
             throw new IllegalArgumentException("Invalid education_qualification");
     }
 
-   public User create(UserDTO dto, AppUser appUser) {
-    validateEnums(dto);
-    User user = User.builder()
-            .role(getRole(dto.getRoleId()))
-            .firstName(dto.getFirstName())
-            .middleName(dto.getMiddleName())
-            .lastName(dto.getLastName())
-            .birthDate(dto.getBirthDate())
-            .gender(dto.getGender())
-            .skills(dto.getSkills())
-            .address(dto.getAddress())
-            .contactNumber(dto.getContactNumber())
-            .emergencyContactName(dto.getEmergencyContactName())
-            .emergencyContactNumber(dto.getEmergencyContactNumber())
-            .relationship(dto.getRelationship())
-            .educationQualification(dto.getEducationQualification())
-            .appUser(appUser) // ✅ Ownership enforced
-            .build();
+  public User create(UserDTO dto, AppUser appUser) {
+    User user = new User();
+    user.setFirstName(dto.getFirstName());
+    user.setMiddleName(dto.getMiddleName());
+    user.setLastName(dto.getLastName());
+    user.setBirthDate(dto.getBirthDate());
+    user.setGender(dto.getGender());
+    user.setSkills(dto.getSkills());
+    user.setAddress(dto.getAddress());
+    user.setContactNumber(dto.getContactNumber());
+    user.setEmergencyContactName(dto.getEmergencyContactName());
+    user.setEmergencyContactNumber(dto.getEmergencyContactNumber());
+    user.setRelationship(dto.getRelationship());
+    user.setEducationQualification(dto.getEducationQualification());
+    user.setAppUser(appUser);
+
+    // 🔗 Map team and role
+    if (dto.getTeamid() != null) {
+        Teams team = teamRepository.findById(dto.getTeamid())
+            .orElseThrow(() -> new IllegalArgumentException("Invalid team ID"));
+        user.setTeam(team);
+    }
+
+    if (dto.getRoleId() != null) {
+        Role role = roleRepository.findById(dto.getRoleId())
+            .orElseThrow(() -> new IllegalArgumentException("Invalid role ID"));
+        user.setRole(role);
+    }
+
     return userRepository.save(user);
 }
-
 
     public User update(Integer id, UserDTO dto) {
         validateEnums(dto);

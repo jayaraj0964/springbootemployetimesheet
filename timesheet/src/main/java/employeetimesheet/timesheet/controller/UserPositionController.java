@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import employeetimesheet.timesheet.dto.Roledto;
 import employeetimesheet.timesheet.dto.UserPositionDTO;
+import employeetimesheet.timesheet.entity.Role;
 import employeetimesheet.timesheet.entity.UserPosition;
 import employeetimesheet.timesheet.service.UserPositionService;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +31,16 @@ public class UserPositionController {
     public UserPosition getById(@PathVariable Integer id) { return service.findById(id); }
 
     @PostMapping("/postuser_positions")
-    public ResponseEntity<UserPosition> create(@RequestBody UserPositionDTO dto) {
-        return ResponseEntity.ok(service.create(dto));
-    }
+    public ResponseEntity<UserPositionDTO> create(@RequestBody UserPositionDTO dto) {
+    UserPosition up = service.create(dto);
+    UserPositionDTO responseDto = new UserPositionDTO();
+    responseDto.setUserPositionId(up.getUserPositionId());
+    responseDto.setUserId(up.getUser().getUserId());
+    responseDto.setPositionId(up.getPosition().getPositionId());
+    responseDto.setDescription(up.getDescription());
+    return ResponseEntity.ok(responseDto);
+}
+
 
     @PutMapping("/{id}")
     public UserPosition update(@PathVariable Integer id, @RequestBody UserPositionDTO dto) {

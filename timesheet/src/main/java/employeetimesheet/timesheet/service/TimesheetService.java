@@ -1,4 +1,5 @@
 package employeetimesheet.timesheet.service;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import employeetimesheet.timesheet.dto.TimeSheetDTO;
@@ -12,6 +13,7 @@ import employeetimesheet.timesheet.repository.TimeSheetRepository;
 import employeetimesheet.timesheet.repository.UserRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,21 +27,25 @@ public class TimesheetService {
         if (id == null) return null;
         return taskCategoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Category not found: " + id));
     }
+
     public Shift getShift(Integer id) {
         if (id == null) return null;
         return shiftRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Shift not found: " + id));
     }
+
     public User getUser(Integer id) {
         return userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
     }
 
-    public List<Timesheet> findAll() { return timesheetRepository.findAll(); }
+    public List<Timesheet> findAll() {
+        return timesheetRepository.findAll();
+    }
 
     public Timesheet findById(Integer id) {
         return timesheetRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Timesheet not found: " + id));
     }
 
-    public Timesheet create(TimeSheetDTO dto) {
+    public TimeSheetDTO create(TimeSheetDTO dto) {
         Timesheet t = Timesheet.builder()
                 .category(getCategory(dto.getCategoryId()))
                 .shift(getShift(dto.getShiftId()))
@@ -48,10 +54,11 @@ public class TimesheetService {
                 .hoursWorked(dto.getHoursWorked())
                 .details(dto.getDetails())
                 .build();
-        return timesheetRepository.save(t);
+        Timesheet saved = timesheetRepository.save(t);
+        return toDto(saved);
     }
 
-    public Timesheet update(Integer id, TimeSheetDTO dto) {
+    public TimeSheetDTO update(Integer id, TimeSheetDTO dto) {
         Timesheet t = findById(id);
         t.setCategory(getCategory(dto.getCategoryId()));
         t.setShift(getShift(dto.getShiftId()));
@@ -59,9 +66,36 @@ public class TimesheetService {
         t.setWorkDate(dto.getWorkDate());
         t.setHoursWorked(dto.getHoursWorked());
         t.setDetails(dto.getDetails());
-        return timesheetRepository.save(t);
+        Timesheet updated = timesheetRepository.save(t);
+        return toDto(updated);
     }
 
-    public void delete(Integer id) { timesheetRepository.deleteById(id); }
-}
+    public void delete(Integer id) {
+        timesheetRepository.deleteById(id);
+    }
 
+    public TimeSheetDTO toDto(Timesheet timesheet) {
+        TimeSheetDTO dto = new TimeSheetDTO();
+        dto.setTimesheetId(timesheet.getTimesheetId());
+        dto.setCategoryId(timesheet.getCategory() != null ? timesheet.getCategory().getCategoryId(): null);
+        dto.setShiftId(timesheet.getShift() != null ? timesheet.getShift().getShiftId() : null);
+        dto.setUserId(timesheet.getUser() != null ? timesheet.getUser().getUserId(): null);
+        dto.setWorkDate(timesheet.getWorkDate());
+        dto.setHoursWorked(timesheet.getHoursWorked());
+        dto.setDetails(timesheet.getDetails());
+        return dto;
+    }
+
+    public List<TimeSheetDTO> findAllAsDto() {
+        return timesheetRepository.findAll().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    // New method to fetch timesheets by userId
+    public List<TimeSheetDTO> findByUserId(Integer userId) {
+        return timesheetRepository.findByUserUserId(userId).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+}

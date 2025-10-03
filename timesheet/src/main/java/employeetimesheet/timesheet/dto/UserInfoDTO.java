@@ -6,24 +6,26 @@ import employeetimesheet.timesheet.entity.User;
 import lombok.Data;
 
 @Data
-    public class UserInfoDTO {
-      private Long id;
-        private String email;
-        private UserProfileDTO profile; // Nested DTO for profile data
+public class UserInfoDTO {
+    private Long id;         // AppUser ID
+    private String email;    // AppUser email
+    private UserProfileDTO profile;
 
-        public UserInfoDTO(Long id, String email) {
-            this.id = id;
-            this.email = email;
-            this.profile = null;
-        }
+    // Constructor for basic info (no profile yet)
+    public UserInfoDTO(Long id, String email) {
+        this.id = id;
+        this.email = email;
+        this.profile = null;
+    }
 
-        public UserInfoDTO(Long id, String email, User profile) {
-            this.id = id;
-            this.email = email;
-            this.profile = profile != null ? new UserProfileDTO(profile) : null;
-        }
+    // Constructor with full profile mapping
+    public UserInfoDTO(Long id, String email, User user) {
+        this.id = id;
+        this.email = email;
+        this.profile = user != null ? new UserProfileDTO(user) : null;
+    }
 
-        @Data
+    @Data
     public static class UserProfileDTO {
         private String firstName;
         private String middleName;
@@ -37,6 +39,11 @@ import lombok.Data;
         private String emergencyContactNumber;
         private String relationship;
         private String educationQualification;
+        private Long teamId;
+        private String teamName;
+        private Long roleId;
+        private String roleName;
+        private Integer Userid;
 
         public UserProfileDTO(User user) {
             this.firstName = user.getFirstName();
@@ -51,8 +58,15 @@ import lombok.Data;
             this.emergencyContactNumber = user.getEmergencyContactNumber();
             this.relationship = user.getRelationship();
             this.educationQualification = user.getEducationQualification();
+            this.Userid=user.getUserId();
+
+            // 🔗 Team mapping
+            this.teamId = user.getTeam() != null ? user.getTeam().getId() : null;
+            this.teamName = user.getTeam() != null ? user.getTeam().getTeamname() : null;
+
+            // 🔗 Role mapping
+            this.roleId = user.getRole() != null ? Long.valueOf(user.getRole().getRoleId()) : null;
+            this.roleName = user.getRole() != null ? user.getRole().getRoleName() : null;
         }
     }
 }
-    
-

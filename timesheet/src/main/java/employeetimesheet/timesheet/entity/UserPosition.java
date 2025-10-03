@@ -29,12 +29,12 @@ public class UserPosition {
     private Integer userPositionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id",insertable = true, updatable = true, nullable = false)
+    @JoinColumn(name = "user_id",insertable = true, updatable = true)
     @JsonIgnore
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "position_id",insertable = true, updatable = true, nullable = false)
+    @JoinColumn(name = "position_id", insertable = true, updatable = true)
     @JsonIgnore
     private Position position;
 

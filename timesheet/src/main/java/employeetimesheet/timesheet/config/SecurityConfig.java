@@ -1,6 +1,5 @@
 package employeetimesheet.timesheet.config;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,62 +27,76 @@ public class SecurityConfig {
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
     public SecurityConfig() {
-        logger.info("🔐 SecurityConfig initialized");
+        logger.info("🔐 SecurityConfig initialized at {}", java.time.LocalDateTime.now());
     }
 
     @Autowired
     private JwtFilter jwtFilter;
 
     @Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration config = new CorsConfiguration();
-    // config.setAllowedOrigins(List.of("https://timesheet-frontend-forgetpassword-r-five.vercel.app")); // ✅ Frontend origin
-     config.setAllowedOrigins(List.of("http://localhost:3000","http://localhost:8080")); 
-    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // ✅ Include OPTIONS
-    config.setAllowedHeaders(List.of("*")); // ✅ Allow all headers
-    config.setAllowCredentials(true); // ✅ If you're using cookies or auth headers
+    public CorsConfigurationSource corsConfigurationSource() {
+        logger.info("🔐 Configuring CORS settings");
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:8080","https://employeetimeshhet-176m.vercel.app"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", config); // ✅ Apply to all endpoints
-    return source;
-}
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 
-    
-   @Bean
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    logger.info("🔐 Configuring SecurityFilterChain");
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        logger.info("🔐 Configuring SecurityFilterChain at {}", java.time.LocalDateTime.now());
 
-    return http
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/auth/**").permitAll() // 🔓 Open to all
-            .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").hasRole("ADMIN") // 🔐 Swagger only for admins
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .authorizeHttpRequests(auth -> auth
+                // Public endpoints (no authentication required)
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").hasRole("ADMIN")
 
-            // ✅ Role-based access control
-            .requestMatchers("/api/users").hasRole("USER")// 🔓 Only this endpoint for USER
-            .requestMatchers("/api/users/postuser/**").hasRole("USER") 
-            .requestMatchers("/api/users/me").hasRole("USER")
-            .requestMatchers("/api/users/{id}").hasRole("USER")
-            .requestMatchers("/api/**").hasRole("ADMIN")   // 🔐 All other /api/** endpoints for ADMIN only
+                // User and Admin accessible endpoints
+                .requestMatchers("/api/users").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/users/postuser/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/users/me").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/users/{id}").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/timesheets/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/task-categories").hasAnyRole("USER", "ADMIN") // Added for task categories
+                .requestMatchers("/api/shifts").hasAnyRole("USER", "ADMIN") // Added for shifts
+                .requestMatchers("/api/user-positions/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/getallteams/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/roles/getallroles/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/users/all/**").hasAnyRole("USER", "ADMIN")
+                // Admin-only endpoints
+                .requestMatchers("/api/roles/postrole").hasRole("ADMIN")
+                .requestMatchers("/api/roles/{id}").hasRole("ADMIN")
+                .requestMatchers("/api/positions").hasRole("ADMIN")
+                .requestMatchers("/api/positions/postpositions").hasRole("ADMIN")
+                .requestMatchers("/api/positions/{id}").hasRole("ADMIN")
 
-            .anyRequest().authenticated() // 🔒 Everything else needs authentication
-        )
-        .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-        .build();
-}
+                // Catch-all for other API endpoints (admin-only unless specified)
+                .requestMatchers("/api/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-
+        return http.build();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        logger.info("🔐 Initializing PasswordEncoder (BCrypt)");
+        logger.info("🔐 Initializing PasswordEncoder (BCrypt) at {}", java.time.LocalDateTime.now());
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        logger.info("🔐 Creating AuthenticationManager bean");
+        logger.info("🔐 Creating AuthenticationManager bean at {}", java.time.LocalDateTime.now());
         return config.getAuthenticationManager();
     }
 }
