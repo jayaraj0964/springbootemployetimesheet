@@ -1,7 +1,6 @@
 package employeetimesheet.timesheet.dto;
 
 import java.time.LocalDate;
-
 import employeetimesheet.timesheet.entity.User;
 import lombok.Data;
 
@@ -9,19 +8,22 @@ import lombok.Data;
 public class UserInfoDTO {
     private Long id;         // AppUser ID
     private String email;    // AppUser email
+    private String role;     // AppUser role (e.g., ROLE_ADMIN, ROLE_USER)
     private UserProfileDTO profile;
 
     // Constructor for basic info (no profile yet)
-    public UserInfoDTO(Long id, String email) {
+    public UserInfoDTO(Long id, String email, String role) {
         this.id = id;
         this.email = email;
+        this.role = role;
         this.profile = null;
     }
 
     // Constructor with full profile mapping
-    public UserInfoDTO(Long id, String email, User user) {
+    public UserInfoDTO(Long id, String email, String role, User user) {
         this.id = id;
         this.email = email;
+        this.role = role;
         this.profile = user != null ? new UserProfileDTO(user) : null;
     }
 
@@ -43,7 +45,7 @@ public class UserInfoDTO {
         private String teamName;
         private Long roleId;
         private String roleName;
-        private Integer Userid;
+        private Integer userId;
 
         public UserProfileDTO(User user) {
             this.firstName = user.getFirstName();
@@ -58,7 +60,7 @@ public class UserInfoDTO {
             this.emergencyContactNumber = user.getEmergencyContactNumber();
             this.relationship = user.getRelationship();
             this.educationQualification = user.getEducationQualification();
-            this.Userid=user.getUserId();
+            this.userId = user.getUserId();
 
             // 🔗 Team mapping
             this.teamId = user.getTeam() != null ? user.getTeam().getId() : null;
