@@ -29,7 +29,7 @@ public class EmailService {
         message.setTo(to);
         message.setSubject("🔐 Password Reset Request");
         message.setText("Hi,\n\nClick the link below to reset your password:\n\n" +
-            "https://employeetimeshhet-ufyt.vercel.app/reset-password/?token=" + token +
+            "https://timesheetapplication-v2.vercel.app//reset-password/?token=" + token +
           //  "http://localhost:3000/reset-password/?token=" + token +
             "\n\nThis link will expire in 30 minutes.\n\nRegards,\nTimesheet Team");
 
