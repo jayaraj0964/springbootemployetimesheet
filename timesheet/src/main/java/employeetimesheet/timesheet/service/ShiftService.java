@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class ShiftService {
     private final ShiftRepository shiftRepository;
 
-    private static final List<String> ALLOWED = List.of("Morning","evening","late-night","us-holiday","Indian_holiday");
+    private static final List<String> ALLOWED = List.of("Morning","evening","late-night","us-holiday","Indian_holiday","night_shift");
 
     private void validate(ShiftDTO dto) {
         if (dto.getShiftName() != null && !ALLOWED.contains(dto.getShiftName()))
