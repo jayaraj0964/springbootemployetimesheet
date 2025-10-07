@@ -1,5 +1,7 @@
 package employeetimesheet.timesheet.entity;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,6 +14,7 @@ public class EmailSenderConfig {
     private Long id;
 
     @Column(nullable = false, unique = true)
+    @Value("${app.timesheet.sender}")
     private String senderName;
 
     @Column(nullable = false)
